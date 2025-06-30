@@ -4,42 +4,21 @@ This module provides a service to search for houses on Funda.
 It includes a service class to search for houses in a 
 specified city on Funda, retrieving the search results as a dictionary.
 
-Environment Variables:
-    FUNDA_SEARCH_TYPE: The type of search (e.g., "buy" or "rent").
-    FUNDA_SEARCH_MIN_PRICE: The minimum price for the search.
-    FUNDA_SEARCH_MAX_PRICE: The maximum price for the search.
-    FUNDA_SEARCH_DAYS_SINCE: The number of days since the houses were listed.
-    FUNDA_SEARCH_PROPERTY_TYPE: The type of property to search for (e.g., "house", "apartment").
-
 Dependencies:
     re
-    os
     funda_scraper (for the FundaScraper class)
 
 Classes:
     FundaService: A service class to search for houses on Funda.
 
 Methods in FundaService:
-    search(search_city: str) -> dict: Searches for houses on Funda in the specified city and 
-      returns the results as a dictionary.
+    search(city: str, type: str, min_price: int, max_price: int, days_since: int, property_type: str) -> dict: 
+      Searches for houses on Funda in the specified city and returns the results as a dictionary.
 """
 
 import re
-import os
-
 from dataclasses import dataclass
-
-from dotenv import load_dotenv
 from funda_scraper import FundaScraper
-
-load_dotenv()
-
-FUNDA_SEARCH_TYPE = os.getenv("FUNDA_SEARCH_TYPE")
-FUNDA_SEARCH_MIN_PRICE = os.getenv("FUNDA_SEARCH_MIN_PRICE")
-FUNDA_SEARCH_MAX_PRICE = os.getenv("FUNDA_SEARCH_MAX_PRICE")
-FUNDA_SEARCH_DAYS_SINCE = os.getenv("FUNDA_SEARCH_DAYS_SINCE")
-FUNDA_SEARCH_PROPERTY_TYPE = os.getenv("FUNDA_SEARCH_PROPERTY_TYPE")
-
 
 @dataclass
 class FundaService:
@@ -50,18 +29,32 @@ class FundaService:
     and retrieve the search results as a dictionary.
 
     Methods:
-        search(search_city: str) -> dict:
+        search(city: str, type: str, min_price: int, max_price: int, days_since: int, property_type: str) -> dict:
             Searches for houses on Funda in the specified city and returns the results as a
             dictionary.
     """
+    def __init__ (self, cities: str, type: str, min_price: int, max_price: int, days_since: int, property_type: str) -> None:
+        """
+        Initializes the FundaService with the specified search parameters.
+        """
+        self.cities = cities
+        self.type = type.lower()
+        self.min_price = min_price
+        self.max_price = max_price
+        self.days_since = days_since
+        self.property_type = property_type.lower()
 
-    @staticmethod
-    def search(search_city: str) -> dict:
+    def search(self, city: str) -> dict:
         """
         Searches for houses on Funda in the specified city.
 
         Args:
-            search_city (str): The city to search for houses.
+            city (str): The city to search for houses.
+            type (str): The type of search (e.g., "buy" or "rent").
+            min_price (int): The minimum price for the search.
+            max_price (int): The maximum price for the search.
+            days_since (int): The number of days since the houses were listed.
+            property_type (str): The type of property to search for (e.g., "house", "apartment").
 
         Returns:
             dict: A dictionary with house information from Funda in the specified city.
@@ -70,15 +63,15 @@ class FundaService:
             ValueError: If house ID, address, or price cannot be extracted from the search results.
         """
         scraper = FundaScraper(
-            area=search_city,
-            want_to=str(FUNDA_SEARCH_TYPE),
+            area=city,
+            want_to=str(self.type),
             page_start=1,
             n_pages=100,
-            min_price=int(FUNDA_SEARCH_MIN_PRICE),
-            max_price=int(FUNDA_SEARCH_MAX_PRICE),
-            days_since=int(FUNDA_SEARCH_DAYS_SINCE),
+            min_price=int(self.min_price),
+            max_price=int(self.max_price),
+            days_since=int(self.days_since),
             find_past=False,
-            property_type=str(FUNDA_SEARCH_PROPERTY_TYPE),
+            property_type=str(self.property_type),
         )
 
         search_results_dict = {}

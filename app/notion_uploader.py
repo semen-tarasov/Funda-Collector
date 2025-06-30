@@ -5,7 +5,6 @@ The NotionUploaderService class uses the Notion API to add house listings found 
 specified Notion database.
 
 Dependencies:
-    os
     requests
     house (for the House class)
 
@@ -21,17 +20,8 @@ Methods in NotionUploaderService:
       database.
 """
 
-import os
 import requests
-
 from house import House
-from dotenv import load_dotenv
-
-load_dotenv()
-
-NOTION_SECRET = os.getenv("NOTION_SECRET")
-NOTION_DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
-
 
 class NotionUploaderService:
     """
@@ -50,17 +40,13 @@ class NotionUploaderService:
             Adds a list of found houses to the Notion database.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, notion_secret, notion_database_id) -> None:
         """
         Initializes the NotionUploaderService with the necessary headers for API requests.
         """
-        if NOTION_SECRET == "PUT_YOUR_NOTION_SECRET_HERE":
-            raise ValueError(
-                "Notion Secret in .env file should be set. Now it contains an example value."
-            )
-
+        self.database_id = notion_database_id
         self.headers = {
-            "Authorization": f"Bearer {NOTION_SECRET}",
+            "Authorization": f"Bearer {notion_secret}",
             "Content-Type": "application/json",
             "Notion-Version": "2022-06-28",
         }
@@ -75,12 +61,7 @@ class NotionUploaderService:
         Returns:
             bool: True if the house is found in the Notion database, False otherwise.
         """
-        if NOTION_DATABASE_ID == "PUT_YOUR_NOTION_DATABASE_ID_HERE":
-            raise ValueError(
-                "Notion Database ID in .env file should be set. Now it contains an example value."
-            )
-
-        query_url = f"https://api.notion.com/v1/databases/{NOTION_DATABASE_ID}/query"
+        query_url = f"https://api.notion.com/v1/databases/{self.database_id}/query"
         query_payload = {
             "filter": {"property": "House ID", "title": {"equals": house.id}}
         }
@@ -107,7 +88,7 @@ class NotionUploaderService:
             create_url = "https://api.notion.com/v1/pages"
 
             create_payload = {
-                "parent": {"database_id": NOTION_DATABASE_ID},
+                "parent": {"database_id": self.database_id},
                 "properties": {
                     "House ID": {"title": [{"text": {"content": str(house.id)}}]},
                     "URL": {"url": house.url},

@@ -28,24 +28,12 @@ Methods in App:
     run_search_and_upload() -> None: Runs the search for houses and uploads them to Notion.
 """
 
-import os
-
-from dotenv import load_dotenv
-
 from funda import FundaService
 from location import LocationService
 from life_level import LifeLevelScoreService
 from notion_uploader import NotionUploaderService
 
 from house import Address, House
-
-load_dotenv()
-
-CITIES = os.getenv("CITIES").split(",")
-
-OFFICE_S = os.getenv("OFFICE_S")
-OFFICE_V = os.getenv("OFFICE_V")
-
 
 class App:
     """
@@ -64,6 +52,8 @@ class App:
         life_level_service: LifeLevelScoreService,
         location_service: LocationService,
         funda_service: FundaService,
+        office_s: str,
+        office_v: str,
     ) -> None:
         """
         Initializes the App class with the given services.
@@ -78,6 +68,8 @@ class App:
         self.life_level = life_level_service
         self.location = location_service
         self.funda = funda_service
+        self.office_s = office_s
+        self.office_v = office_v
 
     def create_house(
         self,
@@ -103,8 +95,8 @@ class App:
         zip_code = self.location.get_zip_code(address_full)
         life_level_score = self.life_level.get_score(zip_code)
 
-        s_office_travel_time = self.location.get_travel_time(address_full, OFFICE_S)
-        v_office_travel_time = self.location.get_travel_time(address_full, OFFICE_V)
+        s_office_travel_time = self.location.get_travel_time(address_full, self.office_s)
+        v_office_travel_time = self.location.get_travel_time(address_full, self.office_v)
 
         house = House(
             id=house_id,
@@ -129,7 +121,7 @@ class App:
         """
         funda_houses = []
 
-        for city in CITIES:
+        for city in self.funda.cities.split(","):
             funda_listings = self.funda.search(city)
 
             if funda_listings:
@@ -138,6 +130,8 @@ class App:
 
         print(f"\nFound {len(funda_houses)} houses.\n")
         self.notion_uploader.add_houses(funda_houses)
+
+        return funda_houses
 
 
 if __name__ == "__main__":

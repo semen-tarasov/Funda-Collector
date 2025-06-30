@@ -4,7 +4,6 @@ and travel-related functionalities. It includes methods to get travel times betw
 to retrieve ZIP codes from addresses.
 
 Dependencies:
-    os
     datetime
     googlemaps
 
@@ -22,16 +21,8 @@ Methods in LocationService:
     get_zip_code(address: str) -> str: Gets the ZIP code for a given address.
 """
 
-import os
 from datetime import datetime, timedelta
-
 import googlemaps
-from dotenv import load_dotenv
-
-load_dotenv()
-
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-
 
 class LocationService:
     """
@@ -49,16 +40,11 @@ class LocationService:
             Gets the ZIP code for a given address using the Google Maps API.
     """
 
-    def __init__(self):
+    def __init__(self, google_api_key) -> None:
         """
         Initializes the LocationService with a Google Maps API key.
         """
-        if GOOGLE_API_KEY == "PUT_YOUR_GOOGLE_API_KEY_HERE":
-            raise ValueError(
-                "Google API key in .env file should be set. Now it contains an example value."
-            )
-
-        self.gmaps = googlemaps.Client(key=GOOGLE_API_KEY)
+        self.gmaps = googlemaps.Client(key=google_api_key)
         self.departure_time = self.get_departure_time()
 
     @staticmethod
