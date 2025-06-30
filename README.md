@@ -23,13 +23,13 @@ This script searches for new houses on Funda and sends the data to a specified N
 
 2. **Create a virtual environment** (optional but recommended):
     ```sh
-    python -m venv venv
+    python3 -m venv venv
     source venv/bin/activate   # On Windows use `venv\Scripts\activate`
     ```
 
 3. **Install the dependencies**:
     ```sh
-    pip install -r requirements.txt
+    pip install -r app/requirements.txt
     ```
 
 ## Configuration
